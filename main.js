@@ -8,25 +8,31 @@ async function prosesVideo() {
         return;
     }
 
-    // Tampilkan animasi loading
+    // Tampilkan animasi loading sebentar biar kelihatan prosesnya
     document.getElementById('loading').style.display = 'block';
     document.getElementById('result').style.display = 'none';
 
     try {
-        // MENGGUNAKAN RACIKAN FORMAT Y2MATE YANG JAUH LEBIH STABIL DAN DIJAMIN PAS
-        const y2mateUrl = `https://www.y2mate.com/id/download?url=${encodeURIComponent(videoUrl)}`;
+        // TRIK ANTI-IKLAN: Ubah link youtube biasa menjadi format pintasan SaveFrom
+        // Contoh: https://youtube.com/... menjadi https://ssyoutube.com/...
+        let cleanUrl = videoUrl;
+        if (cleanUrl.includes('youtu.be/')) {
+            cleanUrl = cleanUrl.replace('youtu.be/', 'youtube.com/watch?v=');
+        }
+        
+        const saveFromUrl = cleanUrl.replace('youtube.com/', 'ssyoutube.com/');
         
         // Setup tampilan di halaman web lo
         document.getElementById('videoTitle').innerText = "Video YouTube Siap Diunduh!";
         document.getElementById('videoThumbnail').src = "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500"; 
         
         // Pasang link ke tombol hijau lo
-        document.getElementById('downloadBtn').href = y2mateUrl;
+        document.getElementById('downloadBtn').href = saveFromUrl;
         
-        // Otomatis buka di tab baru ke halaman download Y2Mate yang asli
-        window.open(y2mateUrl, '_blank');
+        // Otomatis buka di tab baru ke halaman SaveFrom yang bersih
+        window.open(saveFromUrl, '_blank');
 
-        // Munculkan box hijau biar user bisa klik manual jika pop-up terblokir
+        // Munculkan box hijau di web lo biar aman
         document.getElementById('result').style.display = 'block';
 
     } catch (error) {
