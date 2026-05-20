@@ -8,31 +8,40 @@ async function prosesVideo() {
         return;
     }
 
-    // Tampilkan animasi loading sebentar biar kelihatan prosesnya
+    // Tampilkan animasi loading
     document.getElementById('loading').style.display = 'block';
     document.getElementById('result').style.display = 'none';
 
     try {
-        // TRIK ANTI-IKLAN: Ubah link youtube biasa menjadi format pintasan SaveFrom
-        // Contoh: https://youtube.com/... menjadi https://ssyoutube.com/...
-        let cleanUrl = videoUrl;
-        if (cleanUrl.includes('youtu.be/')) {
-            cleanUrl = cleanUrl.replace('youtu.be/', 'youtube.com/watch?v=');
+        // Trik Ekstrak ID Video YouTube untuk mengambil thumbnail asli dari server Google
+        let videoId = '';
+        if (videoUrl.includes('youtu.be/')) {
+            videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
+        } else if (videoUrl.includes('v=')) {
+            videoId = videoUrl.split('v=')[1].split('&')[0];
+        } else if (videoUrl.includes('embed/')) {
+            videoId = videoUrl.split('embed/')[1].split('?')[0];
         }
-        
-        const saveFromUrl = cleanUrl.replace('youtube.com/', 'ssyoutube.com/');
-        
-        // Setup tampilan di halaman web lo
-        document.getElementById('videoTitle').innerText = "Video YouTube Siap Diunduh!";
-        document.getElementById('videoThumbnail').src = "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500"; 
-        
-        // Pasang link ke tombol hijau lo
-        document.getElementById('downloadBtn').href = saveFromUrl;
-        
-        // Otomatis buka di tab baru ke halaman SaveFrom yang bersih
-        window.open(saveFromUrl, '_blank');
 
-        // Munculkan box hijau di web lo biar aman
+        if (!videoId) {
+            alert('Format link YouTube tidak dikenali!');
+            return;
+        }
+
+        // 1. KITA KEMBALIKAN FOTO THUMBNAIL ASLI VIDEONYA DARI YOUTUBE (HQ)
+        document.getElementById('videoThumbnail').src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+        
+        // 2. KITA SET JUDULNYA BIAR RELEVAN
+        document.getElementById('videoTitle').innerText = "Video YouTube Siap Diunduh!";
+
+        // 3. TRIK ANTI-IKLAN: Arahkan tombol download ke widget converter bersih tanpa pop-up luar
+        const cleanWidgetUrl = `https://y2mate.tools/en/convert?url=${encodeURIComponent(videoUrl)}`;
+        document.getElementById('downloadBtn').href = cleanWidgetUrl;
+
+        // Buka widget download resmi di tab baru yang auto-load videonya
+        window.open(cleanWidgetUrl, '_blank');
+
+        // Munculkan kembali box hasil hijau lo yang cantik itu
         document.getElementById('result').style.display = 'block';
 
     } catch (error) {
