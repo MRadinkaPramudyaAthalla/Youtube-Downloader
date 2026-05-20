@@ -5,7 +5,7 @@ const loading = document.getElementById('loading');
 const videoDetails = document.getElementById('video-details');
 
 // Nanti ganti dengan URL backend Vercel kamu ya, Sya! (Contoh: https://xxx.vercel.app)
-const BACKEND_URL = 'https://youtube-downloader-phi-vert.vercel.app';
+const BACKEND_URL = '';
 
 btnFetch.addEventListener('click', async () => {
     const url = videoUrlInput.value.trim();
