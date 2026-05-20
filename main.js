@@ -8,12 +8,11 @@ async function prosesVideo() {
         return;
     }
 
-    // Tampilkan animasi loading
     document.getElementById('loading').style.display = 'block';
     document.getElementById('result').style.display = 'none';
 
     try {
-        // Ambil info judul asli dan thumbnail asli langsung lewat jalur resmi NoEmbed YouTube
+        // 1. Ambil judul dan thumbnail resmi dari YouTube NoEmbed
         const response = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(videoUrl)}`);
         const data = await response.json();
 
@@ -21,32 +20,27 @@ async function prosesVideo() {
             throw new Error('Gagal mengambil data video');
         }
 
-        // Tampilkan judul asli dan foto asli video ke halaman web lo!
         document.getElementById('videoTitle').innerText = data.title;
         document.getElementById('videoThumbnail').src = data.thumbnail_url;
 
-        // Trik download langsung: Kita pakai format mirror download link otomatis
-        // User tetap berada di web lo, pas diklik tombol hijau baru proses download jalan murni
-        let cleanUrl = videoUrl;
-        if (cleanUrl.includes('youtu.be/')) {
-            cleanUrl = cleanUrl.replace('youtu.be/', 'youtube.com/watch?v=');
-        }
-        const directDownloadUrl = cleanUrl.replace('youtube.com/', 'ssyoutube.com/');
-
-        // Set target link ke tombol hijau tanpa membuka window.open otomatis lagi!
-        document.getElementById('downloadBtn').href = directDownloadUrl;
+        // 2. Tembak ke fungsi backend Netlify lo yang baru untuk generate direct download stream
+        // Trik ini bikin user TETAP di web lo, dan pas diklik langsung ke-download otomatis!
+        const directDownloadUrl = `${BACKEND_URL}/.netlify/functions/video-info?url=${encodeURIComponent(videoUrl)}`;
         
-        // JANGAN buka tab baru otomatis, biarkan user klik manual di tombol hijau lo sendiri
-        // document.getElementById('downloadBtn').setAttribute('target', '_blank'); // Hapus atau biarkan jika ingin tab baru pas klik tombol hijau saja
+        const downloadBtn = document.getElementById('downloadBtn');
+        downloadBtn.href = directDownloadUrl;
+        
+        // Hapus target _blank biar gak ngebuka tab baru yang gak jelas!
+        downloadBtn.removeAttribute('target'); 
+        // Paksa browser menganggap ini file unduhan
+        downloadBtn.setAttribute('download', `${data.title}.mp4`); 
 
-        // Munculkan box hasil lo yang cantik dan rapi
         document.getElementById('result').style.display = 'block';
 
     } catch (error) {
         console.error(error);
-        alert('Gagal memproses detail video. Pastikan link YouTube benar.');
+        alert('Gagal memproses video. Pastikan link YouTube benar.');
     } finally {
-        // Matikan loading animasi
         document.getElementById('loading').style.display = 'none';
     }
 }
