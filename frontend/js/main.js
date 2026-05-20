@@ -4,8 +4,8 @@ const resultBox = document.getElementById('result-box');
 const loading = document.getElementById('loading');
 const videoDetails = document.getElementById('video-details');
 
-const BACKEND_URL = 'http://localhost:5000';
-
+// Ganti alamat localhost dengan alamat link dari Render kamu ya!
+const BACKEND_URL = 'https://nama-service-kamu.onrender.com';
 btnFetch.addEventListener('click', async () => {
     const url = videoUrlInput.value.trim();
 
