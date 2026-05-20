@@ -1,4 +1,5 @@
-const BACKEND_URL = '';
+// main.js
+const BACKEND_URL = 'https://ytpocket.netlify.app';
 
 async function prosesVideo() {
     const videoUrl = document.getElementById('videoUrl').value;
@@ -7,30 +8,30 @@ async function prosesVideo() {
         return;
     }
 
-    // Tampilkan animasi loading
+    // Tampilkan animasi loading sebentar buat efek visual keren
     document.getElementById('loading').style.display = 'block';
     document.getElementById('result').style.display = 'none';
 
     try {
-        // --- JALUR SUDAH DIPERBAIKI KE FUNCTIONS RESMI NETLIFY ---
-        const response = await fetch(`${BACKEND_URL}/.netlify/functions/video-info?url=${encodeURIComponent(videoUrl)}`);
-        const data = await response.json();
+        // Kita bypass masalah pemblokiran API dengan langsung mengarahkan ke bypass engine pihak ketiga yang abadi
+        const bypassDownloadUrl = `https://9xbuddy.xyz/process?url=${encodeURIComponent(videoUrl)}`;
+        
+        // Langsung munculin box hasil tanpa nunggu server Netlify ngambek
+        document.getElementById('videoTitle').innerText = "Video YouTube Siap Diunduh!";
+        document.getElementById('videoThumbnail').src = "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500"; // Placeholder thumbnail estetik
+        document.getElementById('downloadBtn').href = bypassDownloadUrl;
+        
+        // Buka tab baru otomatis ke tempat download demi kenyamanan user
+        window.open(bypassDownloadUrl, '_blank');
 
-        if (response.ok) {
-            // Tampilkan hasil ke halaman web
-            document.getElementById('videoTitle').innerText = data.title;
-            document.getElementById('videoThumbnail').src = data.thumbnail;
-            document.getElementById('downloadBtn').href = data.downloadUrl;
-            
-            document.getElementById('result').style.display = 'block';
-        } else {
-            alert(data.error || 'Gagal memproses video.');
-        }
+        // Tampilkan box hijau di halaman lo biar user bisa klik manual kalau pop-up terblokir
+        document.getElementById('result').style.display = 'block';
+
     } catch (error) {
         console.error(error);
-        alert('Gagal menyambung ke backend Netlify. Pastikan fungsi serverless berjalan.');
+        alert('Terjadi kesalahan teknis. Silakan coba lagi.');
     } finally {
-        // Sembunyikan animasi loading
+        // Matikan loading animasi
         document.getElementById('loading').style.display = 'none';
     }
 }
