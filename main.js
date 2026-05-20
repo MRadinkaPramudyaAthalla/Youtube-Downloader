@@ -13,40 +13,38 @@ async function prosesVideo() {
     document.getElementById('result').style.display = 'none';
 
     try {
-        // Trik Ekstrak ID Video YouTube untuk mengambil thumbnail asli dari server Google
-        let videoId = '';
-        if (videoUrl.includes('youtu.be/')) {
-            videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
-        } else if (videoUrl.includes('v=')) {
-            videoId = videoUrl.split('v=')[1].split('&')[0];
-        } else if (videoUrl.includes('embed/')) {
-            videoId = videoUrl.split('embed/')[1].split('?')[0];
+        // Ambil info judul asli dan thumbnail asli langsung lewat jalur resmi NoEmbed YouTube
+        const response = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(videoUrl)}`);
+        const data = await response.json();
+
+        if (!data || !data.title) {
+            throw new Error('Gagal mengambil data video');
         }
 
-        if (!videoId) {
-            alert('Format link YouTube tidak dikenali!');
-            return;
-        }
+        // Tampilkan judul asli dan foto asli video ke halaman web lo!
+        document.getElementById('videoTitle').innerText = data.title;
+        document.getElementById('videoThumbnail').src = data.thumbnail_url;
 
-        // 1. KITA KEMBALIKAN FOTO THUMBNAIL ASLI VIDEONYA DARI YOUTUBE (HQ)
-        document.getElementById('videoThumbnail').src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+        // Trik download langsung: Kita pakai format mirror download link otomatis
+        // User tetap berada di web lo, pas diklik tombol hijau baru proses download jalan murni
+        let cleanUrl = videoUrl;
+        if (cleanUrl.includes('youtu.be/')) {
+            cleanUrl = cleanUrl.replace('youtu.be/', 'youtube.com/watch?v=');
+        }
+        const directDownloadUrl = cleanUrl.replace('youtube.com/', 'ssyoutube.com/');
+
+        // Set target link ke tombol hijau tanpa membuka window.open otomatis lagi!
+        document.getElementById('downloadBtn').href = directDownloadUrl;
         
-        // 2. KITA SET JUDULNYA BIAR RELEVAN
-        document.getElementById('videoTitle').innerText = "Video YouTube Siap Diunduh!";
+        // JANGAN buka tab baru otomatis, biarkan user klik manual di tombol hijau lo sendiri
+        // document.getElementById('downloadBtn').setAttribute('target', '_blank'); // Hapus atau biarkan jika ingin tab baru pas klik tombol hijau saja
 
-        // 3. TRIK ANTI-IKLAN: Arahkan tombol download ke widget converter bersih tanpa pop-up luar
-        const cleanWidgetUrl = `https://y2mate.tools/en/convert?url=${encodeURIComponent(videoUrl)}`;
-        document.getElementById('downloadBtn').href = cleanWidgetUrl;
-
-        // Buka widget download resmi di tab baru yang auto-load videonya
-        window.open(cleanWidgetUrl, '_blank');
-
-        // Munculkan kembali box hasil hijau lo yang cantik itu
+        // Munculkan box hasil lo yang cantik dan rapi
         document.getElementById('result').style.display = 'block';
 
     } catch (error) {
         console.error(error);
-        alert('Terjadi kesalahan teknis. Silakan coba lagi.');
+        alert('Gagal memproses detail video. Pastikan link YouTube benar.');
     } finally {
         // Matikan loading animasi
         document.getElementById('loading').style.display = 'none';
