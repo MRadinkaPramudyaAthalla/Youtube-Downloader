@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const serverless = require('serverless-http'); // Import package serverless
 const app = express();
 
 app.use(cors());
@@ -34,5 +35,8 @@ app.get('/api/video-info', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server makelar aktif di port ${PORT}`));
+// Daftarkan base path agar Express dikenali di folder backend Netlify
+app.use('/.netlify/functions/server', app); 
+
+// Export handler serverless untuk Netlify
+module.exports.handler = serverless(app);
