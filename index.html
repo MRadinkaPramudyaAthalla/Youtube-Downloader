@@ -23,32 +23,30 @@
 
         <div class="space-y-4">
             <div class="relative">
-                <input type="text" id="video-url" placeholder="Tempel link YouTube di sini..." 
+                <input type="text" id="videoUrl" placeholder="Tempel link YouTube di sini..." 
                        class="w-full bg-slate-900 border border-slate-700 rounded-2xl py-4 px-5 pr-12 text-white placeholder-slate-500 focus:outline-none focus:border-red-500 transition-all">
                 <i class="fab fa-youtube absolute right-4 top-5 text-2xl text-slate-600"></i>
             </div>
             
-            <button id="btn-fetch" class="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 font-bold py-4 rounded-2xl transition-all shadow-lg flex justify-center items-center gap-2">
-                <span>Proses Video</span> <i class="fas fa-arrow-right"></i>
+            <button onclick="prosesVideo()" class="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-bold py-4 rounded-2xl transition-all shadow-lg transform hover:scale-[1.02] active:scale-[0.98]">
+                Proses Video →
             </button>
         </div>
 
-        <div id="result-box" class="hidden mt-8 p-4 bg-slate-900 rounded-2xl border border-slate-700 text-left">
-            <div id="loading" class="hidden text-center py-4">
-                <i class="fas fa-spinner animate-spin text-red-500 text-3xl mb-2"></i>
-                <p class="text-sm text-slate-400">Sedang menganalisis video...</p>
-            </div>
+        <div id="loading" class="hidden text-center py-6 mt-8">
+            <i class="fas fa-spinner animate-spin text-red-500 text-3xl mb-2"></i>
+            <p class="text-sm text-slate-400">Sedang menganalisis video...</p>
+        </div>
 
-            <div id="video-details" class="hidden space-y-4">
-                <img id="video-thumb" src="" alt="Thumbnail" class="w-full rounded-xl object-cover shadow-md">
-                <h3 id="video-title" class="font-bold text-slate-200 line-clamp-2">Judul Video</h3>
-                <a id="btn-download" href="#" target="_blank" class="w-full block text-center bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition-all shadow-md">
-                    <i class="fas fa-download mr-1"></i> Unduh MP4 Sekarang
-                </a>
-            </div>
+        <div id="result" class="hidden mt-8 p-4 bg-slate-900 rounded-2xl border border-slate-700 text-left space-y-4">
+            <img id="videoThumbnail" src="" alt="Thumbnail" class="w-full rounded-xl object-cover shadow-md">
+            <h3 id="videoTitle" class="font-bold text-slate-200 line-clamp-2">Judul Video</h3>
+            <a id="downloadBtn" href="#" target="_blank" class="w-full block text-center bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition-all shadow-md">
+                <i class="fas fa-download mr-1"></i> Unduh MP4 Sekarang
+            </a>
         </div>
     </div>
 
-   <script src="main.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
