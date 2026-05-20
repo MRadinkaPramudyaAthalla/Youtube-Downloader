@@ -12,8 +12,8 @@ async function prosesVideo() {
     document.getElementById('result').style.display = 'none';
 
     try {
-        // Tembak ke endpoint lokal Netlify Functions
-        const response = await fetch(`${BACKEND_URL}/api/video-info?url=${encodeURIComponent(videoUrl)}`);
+        // --- JALUR SUDAH DIPERBAIKI KE FUNCTIONS RESMI NETLIFY ---
+        const response = await fetch(`${BACKEND_URL}/.netlify/functions/video-info?url=${encodeURIComponent(videoUrl)}`);
         const data = await response.json();
 
         if (response.ok) {
