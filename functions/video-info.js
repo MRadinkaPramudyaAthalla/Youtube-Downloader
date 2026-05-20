@@ -1,9 +1,10 @@
 // functions/video-info.js
+const fetch = require('node-fetch');
+
 exports.handler = async (event, context) => {
-    // Ambil parameter URL dari query string (?url=...)
     const videoURL = event.queryStringParameters.url;
     
-    // Set Header CORS agar frontend Netlify diizinkan mengaksesnya
+    // Set Header CORS
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
@@ -19,8 +20,7 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        // Panggil API publik rahasia yang super kencang
-        const fetch = (await import('node-fetch')).default;
+        // Panggil API publik rahasia
         const apiResponse = await fetch(`https://api.v02.api-aries.online/api/convert/ytdl?url=${encodeURIComponent(videoURL)}`);
         const data = await apiResponse.json();
 
@@ -32,7 +32,7 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Kembalikan data sukses ke frontend kamu
+        // Kembalikan data ke frontend
         return {
             statusCode: 200,
             headers,
@@ -43,7 +43,7 @@ exports.handler = async (event, context) => {
             })
         };
     } catch (error) {
-        console.error(error);
+        console.error('Error Backend:', error);
         return {
             statusCode: 500,
             headers,
