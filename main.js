@@ -8,23 +8,26 @@ async function prosesVideo() {
         return;
     }
 
-    // Tampilkan animasi loading sebentar buat efek visual keren
+    // Tampilkan animasi loading
     document.getElementById('loading').style.display = 'block';
     document.getElementById('result').style.display = 'none';
 
     try {
-        // Kita bypass masalah pemblokiran API dengan langsung mengarahkan ke bypass engine pihak ketiga yang abadi
-        const bypassDownloadUrl = `https://9xbuddy.xyz/process?url=${encodeURIComponent(videoUrl)}`;
+        // KITA GANTI KE ENGINE SAVETUBE YANG JAUH LEBIH BERSIH DAN STABIL
+        const cleanDownloadUrl = `https://mytube.zyx/download?url=${encodeURIComponent(videoUrl)}`;
+        const backupDownloadUrl = `https://ssyoutube.com/en74/youtube-video-downloader?url=${encodeURIComponent(videoUrl)}`;
         
-        // Langsung munculin box hasil tanpa nunggu server Netlify ngambek
+        // Setup tampilan di halaman web lo
         document.getElementById('videoTitle').innerText = "Video YouTube Siap Diunduh!";
-        document.getElementById('videoThumbnail').src = "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500"; // Placeholder thumbnail estetik
-        document.getElementById('downloadBtn').href = bypassDownloadUrl;
+        document.getElementById('videoThumbnail').src = "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500"; 
         
-        // Buka tab baru otomatis ke tempat download demi kenyamanan user
-        window.open(bypassDownloadUrl, '_blank');
+        // Kita pakai ssyoutube yang paling legendaris dan stabil link-nya
+        document.getElementById('downloadBtn').href = backupDownloadUrl;
+        
+        // Otomatis buka di tab baru ke halaman download yang asli
+        window.open(backupDownloadUrl, '_blank');
 
-        // Tampilkan box hijau di halaman lo biar user bisa klik manual kalau pop-up terblokir
+        // Munculkan box hijau biar user bisa klik manual
         document.getElementById('result').style.display = 'block';
 
     } catch (error) {
