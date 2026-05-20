@@ -19,32 +19,39 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        // MENGGUNAKAN API BARU YANG JAUH LEBIH STABIL & CEPAT
-        const apiResponse = await fetch(`https://api.sandipbgt.com/download?url=${encodeURIComponent(videoURL)}`);
+        // Menggunakan API publik alternatif yang mengembalikan direct link video & audio campuran
+        const apiResponse = await fetch(`https://api.cobalt.tools/api/json`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                url: videoURL,
+                filenamePattern: 'basic'
+            })
+        });
+
         const data = await apiResponse.json();
 
-        // Cek apakah data dari API baru ini valid
-        if (!data || !data.type === 'video') {
+        // Cobalt API mengembalikan objek langsung berupa { status, url, text } jika sukses
+        if (data.status === 'stream' || data.status === 'redirect') {
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify({
+                    title: "Video Berhasil Diproses",
+                    thumbnail: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500", // Placeholder thumbnail cakep
+                    downloadUrl: data.url
+                })
+            };
+        } else {
             return {
                 statusCode: 500,
                 headers,
-                body: JSON.stringify({ error: 'Gagal mengambil info video dari API server.' })
+                body: JSON.stringify({ error: 'Server penyedia video sedang sibuk.' })
             };
         }
-
-        // Ambil link kualitas terbaik (biasanya ada di indeks pertama atau terakhir)
-        const videoData = data.links[0]; 
-
-        // Kembalikan data sukses ke frontend
-        return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-                title: data.title,
-                thumbnail: data.thumbnail,
-                downloadUrl: videoData.link
-            })
-        };
     } catch (error) {
         console.error('Error Backend:', error);
         return {
