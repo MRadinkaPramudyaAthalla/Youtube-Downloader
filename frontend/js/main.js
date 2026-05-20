@@ -4,8 +4,9 @@ const resultBox = document.getElementById('result-box');
 const loading = document.getElementById('loading');
 const videoDetails = document.getElementById('video-details');
 
-// Ganti alamat localhost dengan alamat link dari Render kamu ya!
-const BACKEND_URL = 'https://nama-service-kamu.onrender.com';
+// Nanti ganti dengan URL backend Vercel kamu ya, Sya! (Contoh: https://xxx.vercel.app)
+const BACKEND_URL = 'http://localhost:5000'; 
+
 btnFetch.addEventListener('click', async () => {
     const url = videoUrlInput.value.trim();
 
@@ -20,7 +21,7 @@ btnFetch.addEventListener('click', async () => {
     videoDetails.classList.add('hidden');
 
     try {
-        // 1. Ambil info video dari backend terlebih dahulu
+        // 1. Ambil info video + link download langsung dari backend makelar
         const response = await fetch(`${BACKEND_URL}/api/video-info?url=${encodeURIComponent(url)}`);
         const data = await response.json();
 
@@ -34,8 +35,8 @@ btnFetch.addEventListener('click', async () => {
         document.getElementById('video-thumb').src = data.thumbnail;
         document.getElementById('video-title').innerText = data.title;
         
-        // 3. Arahkan tombol download ke endpoint file streaming backend
-        document.getElementById('btn-download').href = `${BACKEND_URL}/api/download?url=${encodeURIComponent(url)}`;
+        // 3. Langsung arahkan tombol download ke link matang dari API (Tanpa antre server lagi)
+        document.getElementById('btn-download').href = data.downloadUrl;
 
         // Sembunyikan loading, tampilkan tombol download asli
         loading.classList.add('hidden');
@@ -43,7 +44,7 @@ btnFetch.addEventListener('click', async () => {
 
     } catch (error) {
         console.error(error);
-        alert('Gagal menyambung ke server backend. Pastikan backend kamu sudah dijalankan.');
+        alert('Gagal menyambung ke server backend Vercel.');
         resultBox.classList.add('hidden');
     }
 });
