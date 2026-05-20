@@ -1,10 +1,8 @@
-// functions/video-info.js
-const ytdl = require('ytdl-core');
+const fetch = require('node-fetch');
 
 exports.handler = async (event, context) => {
     const videoURL = event.queryStringParameters.url;
     
-    // Header CORS biar gak diblokir browser
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
@@ -12,48 +10,55 @@ exports.handler = async (event, context) => {
     };
 
     if (!videoURL) {
-        return {
-            statusCode: 400,
-            headers,
-            body: JSON.stringify({ error: 'URL wajib diisi!' })
-        };
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'URL wajib diisi!' }) };
     }
 
     try {
-        // Validasi apakah beneran link youtube
-        if (!ytdl.validateURL(videoURL)) {
+        // Kita tembak API pihak ketiga yang handal lewat method POST
+        const res = await fetch("https://api.v02.api-aries.online/api/convert/ytdl", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ url: videoURL })
+        });
+
+        const data = await res.json();
+
+        // Jika API sukses merespons
+        if (data && data.download_url) {
             return {
-                statusCode: 400,
+                statusCode: 200,
                 headers,
-                body: JSON.stringify({ error: 'Link YouTube tidak valid!' })
+                body: JSON.stringify({
+                    title: data.title || "YouTube Video",
+                    thumbnail: data.thumbnail || "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500",
+                    downloadUrl: data.download_url
+                })
             };
         }
 
-        // Ambil info detail video langsung dari YouTube
-        const info = await ytdl.getInfo(videoURL);
-        
-        // Cari format video MP4 yang punya audio (kualitas campuran/highest)
-        const format = ytdl.chooseFormat(info.formats, { quality: 'highestvideo', filter: 'audioandvideo' });
-        
-        // Ambil thumbnail kualitas terbaik
-        const thumbnail = info.videoDetails.thumbnails.pop().url;
-
-        // Kembalikan data rapi ke frontend main.js kamu
+        // Jalur alternatif kedua jika API pertama gagal mengembalikan download_url
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
-                title: info.videoDetails.title,
-                thumbnail: thumbnail,
-                downloadUrl: format.url
+                title: "Video Siap Diunduh",
+                thumbnail: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500",
+                downloadUrl: `https://twdown.tools/download?url=${encodeURIComponent(videoURL)}`
             })
         };
+
     } catch (error) {
-        console.error('Error Mandiri Backend:', error);
+        // Jalur darurat (Fallback) jika internet API mati total, kita direct ke web pihak ketiga secara instan
         return {
-            statusCode: 500,
+            statusCode: 200,
             headers,
-            body: JSON.stringify({ error: 'Gagal memproses video. Coba link video lainnya.' })
+            body: JSON.stringify({
+                title: "Klik Tombol Hijau Di Bawah Untuk Mengunduh",
+                thumbnail: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500",
+                downloadUrl: `https://9xbuddy.xyz/process?url=${encodeURIComponent(videoURL)}`
+            })
         };
     }
-};
+};  
