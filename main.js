@@ -8,39 +8,59 @@ async function prosesVideo() {
         return;
     }
 
+    // Tampilkan loading animasi
     document.getElementById('loading').style.display = 'block';
     document.getElementById('result').style.display = 'none';
 
     try {
-        // 1. Ambil judul dan thumbnail resmi dari YouTube NoEmbed
-        const response = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(videoUrl)}`);
-        const data = await response.json();
+        // 1. Ambil Judul dan Thumbnail ASLI lewat NoEmbed resmi Google
+        const embedRes = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(videoUrl)}`);
+        const embedData = await embedRes.json();
 
-        if (!data || !data.title) {
-            throw new Error('Gagal mengambil data video');
+        if (embedData && embedData.title) {
+            document.getElementById('videoTitle').innerText = embedData.title;
+            document.getElementById('videoThumbnail').src = embedData.thumbnail_url;
+        } else {
+            document.getElementById('videoTitle').innerText = "Video YouTube Siap Diunduh!";
+            document.getElementById('videoThumbnail').src = "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500";
         }
 
-        document.getElementById('videoTitle').innerText = data.title;
-        document.getElementById('videoThumbnail').src = data.thumbnail_url;
+        // 2. AMBIL LINK DOWNLOAD ASLI MP4 LEWAT COBALT API (ANTI-IKLAN & LANGSUNG STREAM FILE)
+        const cobaltRes = await fetch('https://api.cobalt.tools/api/json', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                url: videoUrl,
+                videoQuality: '720', // Resolusi HD yang pas dan stabil
+                filenamePattern: 'basic'
+            })
+        });
 
-        // 2. Tembak ke fungsi backend Netlify lo yang baru untuk generate direct download stream
-        // Trik ini bikin user TETAP di web lo, dan pas diklik langsung ke-download otomatis!
-        const directDownloadUrl = `${BACKEND_URL}/.netlify/functions/video-info?url=${encodeURIComponent(videoUrl)}`;
-        
-        const downloadBtn = document.getElementById('downloadBtn');
-        downloadBtn.href = directDownloadUrl;
-        
-        // Hapus target _blank biar gak ngebuka tab baru yang gak jelas!
-        downloadBtn.removeAttribute('target'); 
-        // Paksa browser menganggap ini file unduhan
-        downloadBtn.setAttribute('download', `${data.title}.mp4`); 
+        const cobaltData = await cobaltRes.json();
 
-        document.getElementById('result').style.display = 'block';
+        if (cobaltData && cobaltData.url) {
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            // Masukkan direct link file video murni (.mp4 stream)
+            downloadBtn.href = cobaltData.url;
+            
+            // Supaya browser langsung mendownload file aslinya tanpa buka tab kosong/eror site unavailable
+            downloadBtn.setAttribute('download', '');
+            
+            // Munculkan box hasil hijau lo yang megah
+            document.getElementById('result').style.display = 'block';
+        } else {
+            alert('Server download sedang penuh, silakan coba beberapa saat lagi.');
+        }
 
     } catch (error) {
         console.error(error);
-        alert('Gagal memproses video. Pastikan link YouTube benar.');
+        alert('Gagal memproses video. Pastikan koneksi internet aman.');
     } finally {
+        // Matikan loading
         document.getElementById('loading').style.display = 'none';
     }
 }
