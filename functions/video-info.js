@@ -4,7 +4,6 @@ const fetch = require('node-fetch');
 exports.handler = async (event, context) => {
     const videoURL = event.queryStringParameters.url;
     
-    // Set Header CORS
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
@@ -20,26 +19,30 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        // Panggil API publik rahasia
-        const apiResponse = await fetch(`https://api.v02.api-aries.online/api/convert/ytdl?url=${encodeURIComponent(videoURL)}`);
+        // MENGGUNAKAN API BARU YANG JAUH LEBIH STABIL & CEPAT
+        const apiResponse = await fetch(`https://api.sandipbgt.com/download?url=${encodeURIComponent(videoURL)}`);
         const data = await apiResponse.json();
 
-        if (!data || data.status !== 'success') {
+        // Cek apakah data dari API baru ini valid
+        if (!data || !data.type === 'video') {
             return {
                 statusCode: 500,
                 headers,
-                body: JSON.stringify({ error: 'Gagal mengambil info video dari API rahasia.' })
+                body: JSON.stringify({ error: 'Gagal mengambil info video dari API server.' })
             };
         }
 
-        // Kembalikan data ke frontend
+        // Ambil link kualitas terbaik (biasanya ada di indeks pertama atau terakhir)
+        const videoData = data.links[0]; 
+
+        // Kembalikan data sukses ke frontend
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
                 title: data.title,
                 thumbnail: data.thumbnail,
-                downloadUrl: data.download_url
+                downloadUrl: videoData.link
             })
         };
     } catch (error) {
@@ -47,7 +50,7 @@ exports.handler = async (event, context) => {
         return {
             statusCode: 500,
             headers,
-            body: JSON.stringify({ error: 'Terjadi kesalahan pada server Netlify.' })
+            body: JSON.stringify({ error: 'Gagal memproses video.' })
         };
     }
 };
