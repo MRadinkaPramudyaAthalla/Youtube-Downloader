@@ -4,6 +4,7 @@
   "description": "YouTube Downloader using Netlify Functions",
   "main": "main.js",
   "dependencies": {
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "ytdl-core": "^4.11.5"
   }
 }

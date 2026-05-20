@@ -1,9 +1,10 @@
 // functions/video-info.js
-const fetch = require('node-fetch');
+const ytdl = require('ytdl-core');
 
 exports.handler = async (event, context) => {
     const videoURL = event.queryStringParameters.url;
     
+    // Header CORS biar gak diblokir browser
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
@@ -19,45 +20,40 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        // Menggunakan API publik alternatif yang mengembalikan direct link video & audio campuran
-        const apiResponse = await fetch(`https://api.cobalt.tools/api/json`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                url: videoURL,
-                filenamePattern: 'basic'
-            })
-        });
-
-        const data = await apiResponse.json();
-
-        // Cobalt API mengembalikan objek langsung berupa { status, url, text } jika sukses
-        if (data.status === 'stream' || data.status === 'redirect') {
+        // Validasi apakah beneran link youtube
+        if (!ytdl.validateURL(videoURL)) {
             return {
-                statusCode: 200,
+                statusCode: 400,
                 headers,
-                body: JSON.stringify({
-                    title: "Video Berhasil Diproses",
-                    thumbnail: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500", // Placeholder thumbnail cakep
-                    downloadUrl: data.url
-                })
-            };
-        } else {
-            return {
-                statusCode: 500,
-                headers,
-                body: JSON.stringify({ error: 'Server penyedia video sedang sibuk.' })
+                body: JSON.stringify({ error: 'Link YouTube tidak valid!' })
             };
         }
+
+        // Ambil info detail video langsung dari YouTube
+        const info = await ytdl.getInfo(videoURL);
+        
+        // Cari format video MP4 yang punya audio (kualitas campuran/highest)
+        const format = ytdl.chooseFormat(info.formats, { quality: 'highestvideo', filter: 'audioandvideo' });
+        
+        // Ambil thumbnail kualitas terbaik
+        const thumbnail = info.videoDetails.thumbnails.pop().url;
+
+        // Kembalikan data rapi ke frontend main.js kamu
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+                title: info.videoDetails.title,
+                thumbnail: thumbnail,
+                downloadUrl: format.url
+            })
+        };
     } catch (error) {
-        console.error('Error Backend:', error);
+        console.error('Error Mandiri Backend:', error);
         return {
             statusCode: 500,
             headers,
-            body: JSON.stringify({ error: 'Gagal memproses video.' })
+            body: JSON.stringify({ error: 'Gagal memproses video. Coba link video lainnya.' })
         };
     }
 };
